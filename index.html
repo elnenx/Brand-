@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Neon Glass Store</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -37,6 +37,8 @@
             background-color: #000000;
             color: #ffffff;
             overflow-x: hidden;
+            /* منع السحب لعمل Refresh في الموبايل */
+            overscroll-behavior-y: none;
         }
         
         html { scroll-behavior: smooth; }
@@ -100,23 +102,23 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="relative w-full h-screen overflow-hidden rounded-b-[3rem] shadow-[0_10px_50px_rgba(0,0,0,0.8)] z-40">
-        <!-- Main Video Background: Added onloadeddata to force play -->
-        <video id="hero-video" src="https://files.catbox.moe/08bjpn.mp4" autoplay loop muted playsinline preload="auto" oncanplay="this.play()" class="absolute inset-0 z-0 scale-105"></video>
+    <!-- Hero Section (Using h-[100dvh] for mobile browser address bar fixes) -->
+    <section class="relative w-full h-[100dvh] overflow-hidden rounded-b-[3rem] shadow-[0_10px_50px_rgba(0,0,0,0.8)] z-40">
+        <!-- Main Video Background: pointer-events-none prevents touching it directly so it doesn't pause -->
+        <video id="hero-video" src="https://files.catbox.moe/08bjpn.mp4" autoplay loop muted playsinline preload="auto" class="absolute inset-0 z-0 scale-105 pointer-events-none"></video>
         
         <!-- Dark Overlay -->
         <div class="absolute inset-0 bg-black/10 z-10 pointer-events-none"></div>
 
-        <!-- Bottom Right Elements (Aligned far right, Side-by-side) -->
-        <div class="absolute bottom-6 right-4 md:bottom-10 md:right-10 flex flex-col items-end gap-3 w-[calc(100%-2rem)] md:w-auto z-20">
+        <!-- Bottom Right Elements (Raised slightly higher for mobile viewports) -->
+        <div class="absolute bottom-12 right-4 md:bottom-16 md:right-10 flex flex-col items-end gap-3 w-[calc(100%-2rem)] md:w-auto z-20">
             
             <!-- Row 1: Follow Us & Shop Now (Side by side) -->
             <div class="flex flex-row justify-end items-stretch gap-2 md:gap-3 w-full md:w-auto max-w-[480px]">
                 
                 <!-- Shop Now -->
-                <a href="#" onclick="openShop(event)" class="flex-1 md:flex-none ios-glass px-4 py-3 md:px-6 md:py-4 rounded-[1.5rem] text-white font-extrabold flex items-center justify-between gap-3 uppercase tracking-wide transition-all duration-500 shadow-glass border border-white/20 hover:border-neon/80 hover:shadow-neon-glass-hover group relative overflow-hidden">
-                    <span class="relative z-10 text-sm md:text-base group-hover:text-neon transition-colors text-nowrap">تسوق الآن</span>
+                <a href="#" onclick="openShop(event)" class="flex-1 md:flex-none ios-glass px-4 py-3 md:px-6 md:py-4 rounded-[1.5rem] text-white font-extrabold flex items-center justify-between gap-3 uppercase tracking-wide transition-all duration-500 shadow-glass border border-white/20 hover:border-neon/80 hover:shadow-neon-glass-hover group relative overflow-hidden cursor-pointer">
+                    <span class="relative z-10 text-sm md:text-base group-hover:text-neon transition-colors text-nowrap">تسوق دلوقتي</span>
                     <i class="fas fa-chevron-left text-neon opacity-70 group-hover:opacity-100 group-hover:-translate-x-2 transition-all duration-300 relative z-10 text-sm md:text-lg"></i>
                     <div class="absolute inset-0 bg-gradient-to-r from-neon/0 to-neon/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 </a>
@@ -137,7 +139,7 @@
             <!-- Row 2: Shipping banner -->
             <div class="w-full md:w-auto ios-glass border border-white/10 px-4 py-3 rounded-[1.5rem] text-center text-xs md:text-sm shadow-glass flex items-center justify-center md:justify-end gap-3 text-white transition-all hover:border-white/30">
                 <i class="fas fa-shipping-fast text-neon text-sm md:text-base"></i>
-                <span class="tracking-wide font-medium">شحن مجاني للطلبات فوق 500 ريال</span>
+                <span class="tracking-wide font-medium">شحن ببلاش للطلبات فوق ٥٠٠ جنيه</span>
             </div>
 
         </div>
@@ -151,7 +153,7 @@
                 <h2 class="text-4xl md:text-5xl font-bold mb-4 relative inline-block text-white tracking-wide">
                     التشكيلة <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon to-green-400">الحصرية</span>
                 </h2>
-                <p class="text-gray-400 mt-4 text-lg font-light">تصاميم زجاجية ومستقبلية تعكس شخصيتك</p>
+                <p class="text-gray-400 mt-4 text-lg font-light">استايلات زجاجية تعكس شخصيتك بجد</p>
             </div>
 
             <!-- Products Grid -->
@@ -161,11 +163,15 @@
                 <div class="group cursor-pointer fade-in-up">
                     <div class="ios-glass p-3 rounded-[2.5rem] shadow-glass border border-white/10 hover:border-neon/40 hover:shadow-neon-glass transition-all duration-500 flex flex-col h-full">
                         <div class="relative w-full aspect-[3/4] overflow-hidden rounded-[2rem] bg-[#0a0a0a] mb-5">
+                            <!-- Removed pointer-events-none here so hover works, but kept playsinline muted -->
                             <video src="https://files.catbox.moe/865s5j.mp4" autoplay loop muted playsinline preload="auto" class="product-video w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-in-out"></video>
                             
-                            <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
-                                <button class="ios-glass border border-neon text-neon px-8 py-3 rounded-full font-bold transform translate-y-8 group-hover:translate-y-0 transition-all duration-500 hover:bg-neon hover:text-black shadow-[0_0_15px_rgba(57,255,20,0.3)]" onclick="addToCart(this)">
-                                    أضف للسلة <i class="fas fa-shopping-cart ml-2"></i>
+                            <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm pointer-events-none"></div>
+                            
+                            <!-- Button is brought forward -->
+                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <button class="ios-glass border border-neon text-neon px-8 py-3 rounded-full font-bold transform translate-y-8 group-hover:translate-y-0 transition-all duration-500 hover:bg-neon hover:text-black shadow-[0_0_15px_rgba(57,255,20,0.3)] z-10" onclick="addToCart(this, event)">
+                                    حط في الكارت <i class="fas fa-cart-plus ml-2"></i>
                                 </button>
                             </div>
                             
@@ -176,10 +182,10 @@
                         
                         <div class="flex justify-between items-center px-3 pb-2 mt-auto">
                             <div>
-                                <h3 class="text-xl font-bold mb-1 text-gray-100 group-hover:text-white transition-colors">إطلالة الشارع العصرية</h3>
+                                <h3 class="text-xl font-bold mb-1 text-gray-100 group-hover:text-white transition-colors">استايل الشارع العصري</h3>
                             </div>
-                            <div class="ios-glass border border-neon/30 px-4 py-2 rounded-2xl text-neon font-bold">
-                                250 ر.س
+                            <div class="ios-glass border border-neon/30 px-4 py-2 rounded-2xl text-neon font-bold whitespace-nowrap">
+                                ٢٥٠ ج.م
                             </div>
                         </div>
                     </div>
@@ -191,9 +197,11 @@
                         <div class="relative w-full aspect-[3/4] overflow-hidden rounded-[2rem] bg-[#0a0a0a] mb-5">
                             <video src="https://files.catbox.moe/orf1qs.mp4" autoplay loop muted playsinline preload="auto" class="product-video w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-in-out"></video>
                             
-                            <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
-                                <button class="ios-glass border border-neon text-neon px-8 py-3 rounded-full font-bold transform translate-y-8 group-hover:translate-y-0 transition-all duration-500 hover:bg-neon hover:text-black shadow-[0_0_15px_rgba(57,255,20,0.3)]" onclick="addToCart(this)">
-                                    أضف للسلة <i class="fas fa-shopping-cart ml-2"></i>
+                            <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm pointer-events-none"></div>
+
+                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <button class="ios-glass border border-neon text-neon px-8 py-3 rounded-full font-bold transform translate-y-8 group-hover:translate-y-0 transition-all duration-500 hover:bg-neon hover:text-black shadow-[0_0_15px_rgba(57,255,20,0.3)] z-10" onclick="addToCart(this, event)">
+                                    حط في الكارت <i class="fas fa-cart-plus ml-2"></i>
                                 </button>
                             </div>
                         </div>
@@ -202,8 +210,8 @@
                             <div>
                                 <h3 class="text-xl font-bold mb-1 text-gray-100 group-hover:text-white transition-colors">طقم السهرة الأسود</h3>
                             </div>
-                            <div class="ios-glass border border-neon/30 px-4 py-2 rounded-2xl text-neon font-bold">
-                                380 ر.س
+                            <div class="ios-glass border border-neon/30 px-4 py-2 rounded-2xl text-neon font-bold whitespace-nowrap">
+                                ٣٨٠ ج.م
                             </div>
                         </div>
                     </div>
@@ -215,14 +223,16 @@
                         <div class="relative w-full aspect-[3/4] overflow-hidden rounded-[2rem] bg-[#0a0a0a] mb-5">
                             <video src="https://files.catbox.moe/zie85h.mp4" autoplay loop muted playsinline preload="auto" class="product-video w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-in-out"></video>
                             
-                            <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
-                                <button class="ios-glass border border-neon text-neon px-8 py-3 rounded-full font-bold transform translate-y-8 group-hover:translate-y-0 transition-all duration-500 hover:bg-neon hover:text-black shadow-[0_0_15px_rgba(57,255,20,0.3)]" onclick="addToCart(this)">
-                                    أضف للسلة <i class="fas fa-shopping-cart ml-2"></i>
+                            <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm pointer-events-none"></div>
+
+                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <button class="ios-glass border border-neon text-neon px-8 py-3 rounded-full font-bold transform translate-y-8 group-hover:translate-y-0 transition-all duration-500 hover:bg-neon hover:text-black shadow-[0_0_15px_rgba(57,255,20,0.3)] z-10" onclick="addToCart(this, event)">
+                                    حط في الكارت <i class="fas fa-cart-plus ml-2"></i>
                                 </button>
                             </div>
                             
                             <div class="absolute top-4 right-4 bg-red-500/20 backdrop-blur-md border border-red-500/50 text-red-400 text-xs font-bold px-4 py-2 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.3)]">
-                                خصم 20%
+                                خصم ٢٠٪
                             </div>
                         </div>
                         
@@ -231,10 +241,10 @@
                                 <h3 class="text-xl font-bold mb-1 text-gray-100 group-hover:text-white transition-colors">فستان كلاسيك أخضر</h3>
                             </div>
                             <div class="flex flex-col items-end">
-                                <div class="ios-glass border border-neon/30 px-4 py-1 rounded-2xl text-neon font-bold mb-1">
-                                    320 ر.س
+                                <div class="ios-glass border border-neon/30 px-4 py-1 rounded-2xl text-neon font-bold mb-1 whitespace-nowrap">
+                                    ٣٢٠ ج.م
                                 </div>
-                                <span class="text-xs text-gray-500 line-through px-2">400 ر.س</span>
+                                <span class="text-xs text-gray-500 line-through px-2">٤٠٠ ج.م</span>
                             </div>
                         </div>
                     </div>
@@ -244,7 +254,7 @@
             
             <div class="text-center mt-20 fade-in-up">
                 <button class="ios-glass border border-neon/50 text-neon hover:bg-neon hover:text-black transition-all duration-500 px-12 py-4 rounded-full font-bold tracking-wide uppercase shadow-neon-glass hover:shadow-neon-glass-hover">
-                    تصفح جميع المنتجات
+                    شوف كل المنتجات
                 </button>
             </div>
         </section>
@@ -255,7 +265,7 @@
                 <div class="text-3xl font-bold tracking-widest text-white mb-6 uppercase">
                     VOGUE <span class="text-neon bg-neon/10 px-2 py-1 rounded-xl border border-neon/20 text-xl align-middle">NEON</span>
                 </div>
-                <p class="mb-8 max-w-md mx-auto text-sm leading-relaxed">نصنع الموضة ولا نتبعها. أزياء مستقبلية بتصميم زجاجي يناسب جرأتك وتبرز شخصيتك الفريدة.</p>
+                <p class="mb-8 max-w-md mx-auto text-sm leading-relaxed">بنصنع الموضة مش بنمشي وراها. استايلات مستقبلية وتصميم زجاجي يناسب جرأتك ويبرز شخصيتك.</p>
                 <div class="flex justify-center gap-6 mb-8 text-2xl">
                     <a href="#" class="w-12 h-12 rounded-full ios-glass flex items-center justify-center text-gray-300 border border-white/10 hover:text-neon hover:border-neon/50 hover:shadow-neon-glass transition-all duration-300"><i class="fab fa-facebook-f"></i></a>
                     <a href="#" class="w-12 h-12 rounded-full ios-glass flex items-center justify-center text-gray-300 border border-white/10 hover:text-neon hover:border-neon/50 hover:shadow-neon-glass transition-all duration-300"><i class="fab fa-twitter"></i></a>
@@ -263,9 +273,9 @@
                 </div>
                 
                 <div class="mt-8 border-t border-white/10 pt-6">
-                    <p class="text-xs text-gray-500">© 2026 جميع الحقوق محفوظة.</p>
+                    <p class="text-xs text-gray-500">© ٢٠٢٦ كل الحقوق محفوظة.</p>
                     <p class="text-sm text-gray-400 mt-2 font-medium tracking-wide">
-                        تم التطوير بواسطه <span class="text-neon font-bold ml-1 drop-shadow-[0_0_8px_rgba(57,255,20,0.6)]">ELNENX</span>
+                        تم التطوير بواسطة <span class="text-neon font-bold ml-1 drop-shadow-[0_0_8px_rgba(57,255,20,0.6)]">ELNENX</span>
                     </p>
                 </div>
             </div>
@@ -274,25 +284,28 @@
 
     <!-- Scripts -->
     <script>
-        // --- Force Video Autoplay Logic ---
+        // --- Video Force Play & Protection against pause ---
         document.addEventListener("DOMContentLoaded", function() {
-            // Function to forcibly start videos
-            const playVideos = () => {
-                const videos = document.querySelectorAll('video');
-                videos.forEach(video => {
-                    video.play().catch(e => console.log("Autoplay was prevented by browser. User interaction needed."));
-                });
+            const heroVideo = document.getElementById('hero-video');
+            
+            const forcePlay = () => {
+                if (heroVideo.paused) {
+                    heroVideo.play().catch(e => console.log("Autoplay blocked, waiting for interaction"));
+                }
             };
 
-            // Attempt to play immediately on load
-            playVideos();
+            forcePlay();
+            
+            // If the video ever pauses (e.g., due to mobile browser quirks), force it back to play
+            heroVideo.addEventListener('pause', () => {
+                // Only force play if we haven't scrolled past it (optimization)
+                if (window.scrollY < window.innerHeight) {
+                    forcePlay();
+                }
+            });
 
-            // Fallback: If autoplay is heavily blocked by the phone, play on the first touch/scroll
-            document.body.addEventListener('touchstart', playVideos, { once: true });
-            document.body.addEventListener('scroll', playVideos, { once: true });
-            document.body.addEventListener('click', playVideos, { once: true });
+            document.body.addEventListener('touchstart', forcePlay, { once: true });
         });
-
 
         // Navbar scroll effect
         const navbar = document.getElementById('navbar');
@@ -320,7 +333,7 @@
             // Remove hidden class
             shopContainer.classList.remove('hidden');
             
-            // Re-trigger product videos when section opens to ensure they are playing
+            // Ensure product videos play when revealed
             document.querySelectorAll('.product-video').forEach(video => {
                 video.play().catch(e => console.log("Product video play prevented."));
             });
@@ -329,7 +342,7 @@
                 shopContainer.classList.remove('opacity-0');
                 shopContainer.classList.add('opacity-100');
                 
-                // Scroll to the shop section smoothly
+                // Scroll down
                 document.getElementById('shop').scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 50);
         }
@@ -338,7 +351,10 @@
         let cartCount = 0;
         const cartBadge = document.getElementById('cart-count');
         
-        function addToCart(btn) {
+        function addToCart(btn, e) {
+            e.preventDefault();
+            e.stopPropagation(); // Prevent card click if you add links later
+
             cartCount++;
             cartBadge.textContent = cartCount;
             
@@ -346,7 +362,7 @@
             setTimeout(() => cartBadge.classList.remove('scale-150'), 300);
             
             const originalText = btn.innerHTML;
-            btn.innerHTML = 'تمت الإضافة <i class="fas fa-check ml-2"></i>';
+            btn.innerHTML = 'اتضاف للكارت <i class="fas fa-check ml-2"></i>';
             btn.classList.replace('text-neon', 'text-black');
             btn.style.background = '#39FF14';
             
@@ -355,8 +371,6 @@
                 btn.classList.replace('text-black', 'text-neon');
                 btn.style.background = 'transparent';
             }, 2000);
-            
-            event.stopPropagation();
         }
 
         // Intersection Observer for scroll animations
