@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Neon Glass Store</title>
+    <title>VOGUE NEON Store</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
@@ -11,17 +11,40 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        window.firebaseApp = null;
+        window.db = null;
+        window.auth = null;
+        window.currentUser = null;
+        window.appId = typeof __app_id !== 'undefined' ? __app_id : 'vogue-neon-app';
+
+        try {
+            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+            window.firebaseApp = initializeApp(firebaseConfig);
+            window.auth = getAuth(window.firebaseApp);
+            window.db = getFirestore(window.firebaseApp);
+            
+            window.fsCollection = collection;
+            window.fsAddDoc = addDoc;
+            window.fsOnSnapshot = onSnapshot;
+            window.fsDeleteDoc = deleteDoc;
+            window.fsDoc = doc;
+        } catch(e) {
+            console.error("Firebase running in local fallback mode");
+        }
+    </script>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Tajawal', 'sans-serif'],
-                    },
-                    colors: {
-                        blackbg: '#050505',
-                        neon: '#39FF14', // الأخضر المشع
-                    },
+                    fontFamily: { sans: ['Tajawal', 'sans-serif'] },
+                    colors: { blackbg: '#050505', neon: '#39FF14' },
                     boxShadow: {
                         'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
                         'neon-glass': '0 0 20px rgba(57, 255, 20, 0.2)',
@@ -38,340 +61,335 @@
             color: #ffffff;
             overflow-x: hidden;
             overscroll-behavior-y: none;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
-        /* Scrollbar styling */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #000; }
         ::-webkit-scrollbar-thumb { background: rgba(57, 255, 20, 0.5); border-radius: 10px; }
+        @media (max-width: 768px) { ::-webkit-scrollbar { display: none; } }
 
-        /* Smooth fade-in animations */
         .fade-in-up {
             opacity: 0;
             transform: translateY(30px);
             transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .fade-in-up.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .fade-in-up.visible { opacity: 1; transform: translateY(0); }
+        ::selection { background-color: rgba(57, 255, 20, 0.4); color: #fff; }
 
-        ::selection {
-            background-color: rgba(57, 255, 20, 0.4);
-            color: #fff;
-        }
-
-        /* Glass Custom Utility - Improved for broader browser support */
         .ios-glass {
             background: rgba(20, 20, 20, 0.45);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
+
+        .view-section { display: none; opacity: 0; transition: opacity 0.4s ease-in-out; }
+        .view-section.active { display: block; opacity: 1; }
         
-        /* Hide scrollbar completely on mobile for cleaner look */
-        @media (max-width: 768px) {
-            ::-webkit-scrollbar { display: none; }
+        /* Default Loader (White/Neon) */
+        .loader { border: 2px solid rgba(255,255,255,0.1); border-top: 2px solid #39FF14; border-radius: 50%; width: 18px; height: 18px; animation: spin 0.8s linear infinite; }
+        /* Black Loader for Neon Buttons */
+        .loader.loader-black { border: 2px solid rgba(0,0,0,0.2); border-top: 2px solid #000000; }
+        
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        select option { background: #111; color: #fff; }
+
+        /* Toast Notification */
+        #toast {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        #toast.show { top: 20px; }
     </style>
 </head>
 <body class="antialiased bg-black">
 
+    <!-- Toast Notification System -->
+    <div id="toast" class="ios-glass border border-neon text-white px-6 py-3 rounded-full font-bold flex items-center gap-3 shadow-neon-glass">
+        <i class="fas fa-check-circle text-neon text-xl"></i>
+        <span id="toast-msg">تمت الإضافة بنجاح</span>
+    </div>
+
     <!-- Floating Navbar -->
-    <nav id="navbar" class="fixed z-50 transition-all duration-300 py-3 px-5 md:py-4 md:px-8 flex justify-between items-center ios-glass rounded-full top-4 left-4 right-4 md:left-10 md:right-10">
-        <div class="text-xl md:text-2xl font-bold tracking-wider uppercase text-white drop-shadow-lg flex items-center gap-2">
-            VOGUE <span class="text-neon text-[10px] md:text-sm bg-neon/10 px-2 py-1 rounded-lg border border-neon/30">NEON</span>
+    <nav id="navbar" class="fixed z-50 transition-all duration-300 py-3 px-5 md:py-4 md:px-8 flex justify-between items-center ios-glass rounded-full top-4 left-4 right-4 md:left-10 md:right-10 shadow-neon-glass">
+        <!-- Logo Fixed: Removed box, just clean text -->
+        <div onclick="switchView('landing')" class="cursor-pointer text-xl md:text-2xl font-bold tracking-wider uppercase drop-shadow-lg flex items-center gap-1.5">
+            <span class="text-white">VOGUE</span> <span class="text-neon">NEON</span>
         </div>
         
         <div class="hidden md:flex gap-8 font-medium">
-            <a href="#" class="text-gray-300 hover:text-neon transition-colors duration-300">الرئيسية</a>
-            <a href="#" onclick="openShop(event)" class="text-gray-300 hover:text-neon transition-colors duration-300">التشكيلة الجديدة</a>
+            <button onclick="switchView('landing')" class="text-gray-300 hover:text-neon transition-colors duration-300">الرئيسية</button>
+            <button onclick="switchView('shop')" class="text-gray-300 hover:text-neon transition-colors duration-300">التشكيلة الجديدة</button>
         </div>
 
-        <div class="flex items-center gap-5 text-xl text-gray-300">
+        <div class="flex items-center gap-4 text-xl text-gray-300">
             <button class="hover:text-neon transition-colors duration-300"><i class="fas fa-search"></i></button>
-            <button class="hover:text-neon transition-colors duration-300 relative">
-                <i class="fas fa-shopping-bag"></i>
-                <span id="cart-count" class="absolute -top-2 -right-2 bg-neon text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-[0_0_10px_#39FF14]">0</span>
+            <button onclick="switchView('cart')" class="hover:text-neon transition-colors duration-300 relative bg-white/5 p-2 rounded-full border border-white/10 shadow-glass">
+                <i class="fas fa-shopping-bag text-lg"></i>
+                <span id="cart-badge" class="absolute -top-1 -right-1 bg-neon text-black text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-[0_0_10px_#39FF14] transition-transform duration-300">0</span>
             </button>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="relative w-full h-[100dvh] overflow-hidden rounded-b-[2.5rem] md:rounded-b-[3rem] shadow-[0_10px_50px_rgba(0,0,0,0.8)] z-40 bg-zinc-900">
-        <!-- Main Video Background: Added webkit-playsinline for iOS -->
-        <video id="hero-video" src="https://files.catbox.moe/08bjpn.mp4" autoplay loop muted playsinline webkit-playsinline class="absolute inset-0 w-full h-full object-cover scale-105 pointer-events-none"></video>
-        
-        <!-- Dark Overlay -->
-        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-black/10 z-10 pointer-events-none"></div>
+    <main id="app-content" class="flex-1">
+        <!-- ================= VIEW 1: LANDING PAGE ================= -->
+        <div id="view-landing" class="view-section active h-[100dvh] w-full overflow-hidden">
+            <section class="relative w-full h-full bg-zinc-900">
+                <video id="hero-video" src="https://files.catbox.moe/08bjpn.mp4" autoplay loop muted playsinline webkit-playsinline preload="auto" class="absolute inset-0 w-full h-full object-cover scale-105 pointer-events-none"></video>
+                <div class="absolute inset-0 bg-black/10 z-10 pointer-events-none"></div>
 
-        <!-- Bottom UI Elements -->
-        <div class="absolute bottom-10 right-4 left-4 md:right-10 md:left-auto flex flex-col items-end gap-3 z-20">
-            
-            <!-- Row 1: Follow Us & Shop Now -->
-            <div class="flex flex-row justify-end items-stretch gap-2 md:gap-3 w-full md:w-auto">
-                
-                <!-- Shop Now Button -->
-                <button onclick="openShop(event)" class="flex-1 md:flex-none ios-glass px-4 py-3 md:px-8 md:py-4 rounded-2xl md:rounded-[1.5rem] text-white font-extrabold flex items-center justify-center gap-3 uppercase tracking-wide transition-all duration-300 shadow-glass border border-white/20 hover:border-neon hover:shadow-neon-glass group cursor-pointer active:scale-95">
-                    <span class="relative z-10 text-sm md:text-base group-hover:text-neon transition-colors text-nowrap">تسوق دلوقتي</span>
-                    <i class="fas fa-chevron-left text-neon opacity-80 group-hover:opacity-100 group-hover:-translate-x-1 transition-all duration-300 relative z-10 text-sm"></i>
-                </button>
+                <div class="absolute bottom-12 right-4 md:bottom-16 md:right-10 flex flex-col items-end gap-3 w-[calc(100%-2rem)] md:w-auto z-20">
+                    <div class="flex flex-row justify-end items-stretch gap-2 md:gap-3 w-full md:w-auto max-w-[480px]">
+                        <button onclick="switchView('shop')" class="flex-1 md:flex-none ios-glass px-4 py-3 md:px-6 md:py-4 rounded-[1.5rem] text-white font-extrabold flex items-center justify-between gap-3 uppercase tracking-wide transition-all duration-500 shadow-glass border border-white/20 hover:border-neon/80 hover:shadow-neon-glass-hover group cursor-pointer active:scale-95">
+                            <span class="relative z-10 text-sm md:text-base group-hover:text-neon transition-colors text-nowrap">تسوق دلوقتي</span>
+                            <i class="fas fa-chevron-left text-neon opacity-70 group-hover:opacity-100 group-hover:-translate-x-2 transition-all duration-300 relative z-10 text-sm md:text-lg"></i>
+                        </button>
 
-                <!-- Follow Us -->
-                <div class="ios-glass px-3 py-3 md:px-5 md:py-4 rounded-2xl md:rounded-[1.5rem] flex items-center justify-center gap-3 shadow-glass border-white/10 shrink-0">
-                    <span class="text-[11px] md:text-sm text-gray-300 font-bold tracking-wider">تابعنا</span>
-                    <span class="w-[1px] h-4 bg-white/20"></span>
-                    <div class="flex gap-3 text-sm md:text-lg text-white">
-                        <a href="#" class="hover:text-neon transition-colors"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="hover:text-neon transition-colors"><i class="fab fa-tiktok"></i></a>
+                        <div class="ios-glass px-3 py-3 md:px-5 md:py-4 rounded-[1.5rem] flex items-center justify-center gap-2 md:gap-3 shadow-glass border-white/10 shrink-0">
+                            <span class="text-xs md:text-base text-gray-300 font-bold tracking-wider">تابعنا</span>
+                            <span class="text-white/20 select-none text-xs md:text-base">|</span>
+                            <div class="flex gap-2 md:gap-4 text-sm md:text-xl text-white">
+                                <a href="#" class="hover:text-neon hover:scale-125 transition-all duration-300"><i class="fab fa-instagram"></i></a>
+                                <a href="#" class="hover:text-neon hover:scale-125 transition-all duration-300"><i class="fab fa-tiktok"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="w-full md:w-auto ios-glass border border-white/10 px-4 py-3 rounded-[1.5rem] text-center text-xs md:text-sm shadow-glass flex items-center justify-center md:justify-end gap-3 text-white transition-all hover:border-white/30">
+                        <i class="fas fa-shipping-fast text-neon text-sm md:text-base"></i>
+                        <span class="tracking-wide font-medium">شحن ببلاش للطلبات فوق ٥٠٠ جنيه</span>
                     </div>
                 </div>
-
-            </div>
-
-            <!-- Row 2: Shipping banner -->
-            <div class="w-full md:w-auto ios-glass border border-white/10 px-4 py-2.5 md:py-3 rounded-2xl md:rounded-[1.5rem] text-center shadow-glass flex items-center justify-center gap-3 text-white">
-                <i class="fas fa-shipping-fast text-neon text-sm md:text-base"></i>
-                <span class="text-[11px] md:text-sm tracking-wide font-medium">شحن ببلاش للطلبات فوق ٥٠٠ جنيه</span>
-            </div>
-
+            </section>
+            <script>document.getElementById('hero-video').play().catch(()=>{});</script>
         </div>
-    </section>
 
-    <!-- Products Section -->
-    <div id="shop-container" class="hidden opacity-0 transition-opacity duration-700 bg-black relative z-30 pt-10">
-        <section id="shop" class="py-16 px-4 md:px-12 max-w-7xl mx-auto">
-            <div class="text-center mb-12 fade-in-up">
-                <h2 class="text-3xl md:text-5xl font-bold mb-3 text-white tracking-wide">
+        <!-- ================= VIEW 2: SHOP (PRODUCTS) ================= -->
+        <div id="view-shop" class="view-section pt-32 pb-10 px-4 md:px-12 max-w-7xl mx-auto min-h-screen">
+            <div class="text-center mb-12 md:mb-16 fade-in-up">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4 relative inline-block text-white tracking-wide">
                     التشكيلة <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon to-green-400">الحصرية</span>
                 </h2>
-                <p class="text-gray-400 text-sm md:text-lg font-light">استايلات زجاجية تعكس شخصيتك بجد</p>
+                <p class="text-gray-400 mt-2 text-base md:text-lg font-light">استايلات زجاجية تعكس شخصيتك بجد</p>
             </div>
 
             <!-- Products Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-                
-                <!-- Product 1 -->
-                <div class="group fade-in-up">
-                    <div class="ios-glass p-2.5 rounded-[2rem] shadow-glass border border-white/10 hover:border-neon/40 transition-all duration-300 flex flex-col h-full">
-                        <div class="relative w-full aspect-[3/4] overflow-hidden rounded-[1.5rem] bg-zinc-900 mb-4">
-                            <video src="https://files.catbox.moe/865s5j.mp4" autoplay loop muted playsinline webkit-playsinline class="product-video w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500"></video>
-                            
-                            <!-- Mobile-friendly Overlay: Visible on mobile by default, hover on desktop -->
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-center pb-6 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
-                                <button class="ios-glass border border-neon text-neon px-6 py-2.5 rounded-full font-bold text-sm md:text-base hover:bg-neon hover:text-black active:scale-95 transition-all shadow-neon-glass" onclick="addToCart(this, event)">
-                                    حط في الكارت <i class="fas fa-cart-plus ml-1"></i>
-                                </button>
-                            </div>
-                            
-                            <div class="absolute top-3 right-3 ios-glass border border-white/20 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase">
-                                جديد
-                            </div>
-                        </div>
-                        
-                        <div class="flex justify-between items-center px-2 pb-1 mt-auto">
-                            <h3 class="text-base md:text-lg font-bold text-gray-100 group-hover:text-neon transition-colors">استايل الشارع العصري</h3>
-                            <div class="ios-glass border border-neon/30 px-3 py-1.5 rounded-xl text-neon font-bold text-sm">
-                                ٢٥٠ ج
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10"></div>
+        </div>
 
-                <!-- Product 2 -->
-                <div class="group fade-in-up" style="transition-delay: 100ms;">
-                    <div class="ios-glass p-2.5 rounded-[2rem] shadow-glass border border-white/10 hover:border-neon/40 transition-all duration-300 flex flex-col h-full">
-                        <div class="relative w-full aspect-[3/4] overflow-hidden rounded-[1.5rem] bg-zinc-900 mb-4">
-                            <video src="https://files.catbox.moe/orf1qs.mp4" autoplay loop muted playsinline webkit-playsinline class="product-video w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500"></video>
-                            
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-center pb-6 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
-                                <button class="ios-glass border border-neon text-neon px-6 py-2.5 rounded-full font-bold text-sm md:text-base hover:bg-neon hover:text-black active:scale-95 transition-all shadow-neon-glass" onclick="addToCart(this, event)">
-                                    حط في الكارت <i class="fas fa-cart-plus ml-1"></i>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="flex justify-between items-center px-2 pb-1 mt-auto">
-                            <h3 class="text-base md:text-lg font-bold text-gray-100 group-hover:text-neon transition-colors">طقم السهرة الأسود</h3>
-                            <div class="ios-glass border border-neon/30 px-3 py-1.5 rounded-xl text-neon font-bold text-sm">
-                                ٣٨٠ ج
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- ================= VIEW 3: PRODUCT DETAILS ================= -->
+        <div id="view-product" class="view-section pt-32 pb-10 px-4 max-w-6xl mx-auto min-h-screen">
+            <button onclick="switchView('shop')" class="mb-6 ios-glass px-5 py-2 rounded-2xl text-gray-300 hover:text-neon text-sm md:text-base font-bold flex items-center gap-2 w-fit border border-white/10 hover:border-neon/50 transition-all shadow-glass">
+                <i class="fas fa-arrow-right"></i> رجوع للمنتجات
+            </button>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10" id="product-detail-content"></div>
+        </div>
 
-                <!-- Product 3 -->
-                <div class="group fade-in-up" style="transition-delay: 200ms;">
-                    <div class="ios-glass p-2.5 rounded-[2rem] shadow-glass border border-white/10 hover:border-neon/40 transition-all duration-300 flex flex-col h-full">
-                        <div class="relative w-full aspect-[3/4] overflow-hidden rounded-[1.5rem] bg-zinc-900 mb-4">
-                            <video src="https://files.catbox.moe/zie85h.mp4" autoplay loop muted playsinline webkit-playsinline class="product-video w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500"></video>
-                            
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-center pb-6 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
-                                <button class="ios-glass border border-neon text-neon px-6 py-2.5 rounded-full font-bold text-sm md:text-base hover:bg-neon hover:text-black active:scale-95 transition-all shadow-neon-glass" onclick="addToCart(this, event)">
-                                    حط في الكارت <i class="fas fa-cart-plus ml-1"></i>
-                                </button>
-                            </div>
-                            
-                            <div class="absolute top-3 right-3 bg-red-500/20 backdrop-blur-md border border-red-500/50 text-red-400 text-[10px] font-bold px-3 py-1.5 rounded-full">
-                                خصم ٢٠٪
-                            </div>
-                        </div>
-                        
-                        <div class="flex justify-between items-center px-2 pb-1 mt-auto">
-                            <h3 class="text-base md:text-lg font-bold text-gray-100 group-hover:text-neon transition-colors">فستان كلاسيك أخضر</h3>
-                            <div class="flex flex-col items-end">
-                                <div class="text-neon font-bold text-sm mb-0.5">٣٢٠ ج</div>
-                                <span class="text-[10px] text-gray-500 line-through">٤٠٠ ج</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+        <!-- ================= VIEW 4: CART ================= -->
+        <div id="view-cart" class="view-section pt-32 pb-10 px-4 max-w-4xl mx-auto min-h-screen">
+            <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-white tracking-wide">
+                    الكارت <i class="fas fa-shopping-cart text-neon ml-2 text-2xl"></i>
+                </h2>
+                <button onclick="switchView('shop')" class="ios-glass px-4 py-2 rounded-xl text-gray-300 hover:text-neon text-sm border border-white/10 transition-all">كمل تسوق <i class="fas fa-arrow-left ml-1"></i></button>
             </div>
             
-            <div class="text-center mt-16 fade-in-up">
-                <button class="ios-glass border border-neon/50 text-neon hover:bg-neon hover:text-black transition-all duration-300 px-10 py-3 rounded-full font-bold text-sm md:text-base tracking-wide uppercase shadow-neon-glass active:scale-95">
-                    شوف كل المنتجات
+            <div id="cart-items-container" class="space-y-4 md:space-y-5 mb-10"></div>
+
+            <div id="cart-summary" class="ios-glass p-6 md:p-8 rounded-[2rem] border border-white/10 shadow-glass hidden">
+                <div class="flex justify-between items-center mb-6 text-xl">
+                    <span class="text-gray-300 font-bold">الإجمالي:</span>
+                    <span id="cart-total" class="font-bold text-neon text-3xl drop-shadow-[0_0_8px_rgba(57,255,20,0.5)]">0 ج.م</span>
+                </div>
+                <button onclick="switchView('checkout')" class="w-full bg-neon text-black font-bold py-4 rounded-2xl hover:bg-white transition-all shadow-neon-glass hover:shadow-neon-glass-hover active:scale-95 text-lg flex justify-center items-center gap-3 uppercase">
+                    إتمام الطلب والدفع <i class="fas fa-arrow-left"></i>
                 </button>
             </div>
-        </section>
+        </div>
 
-        <!-- Footer -->
-        <footer class="ios-glass border-t border-white/10 mt-10 rounded-t-[2.5rem]">
-            <div class="max-w-7xl mx-auto px-6 py-12 text-center text-gray-400">
-                <div class="text-2xl font-bold tracking-widest text-white mb-4 uppercase">
-                    VOGUE <span class="text-neon bg-neon/10 px-2 py-1 rounded-lg border border-neon/20 text-sm align-middle">NEON</span>
-                </div>
-                <p class="mb-6 max-w-sm mx-auto text-xs md:text-sm leading-relaxed">بنصنع الموضة مش بنمشي وراها. استايلات مستقبلية وتصميم زجاجي يناسب جرأتك.</p>
-                <div class="flex justify-center gap-4 mb-6 text-xl">
-                    <a href="#" class="w-10 h-10 rounded-full ios-glass flex items-center justify-center text-gray-300 hover:text-neon hover:border-neon/50 transition-all"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="w-10 h-10 rounded-full ios-glass flex items-center justify-center text-gray-300 hover:text-neon hover:border-neon/50 transition-all"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="w-10 h-10 rounded-full ios-glass flex items-center justify-center text-gray-300 hover:text-neon hover:border-neon/50 transition-all"><i class="fab fa-instagram"></i></a>
-                </div>
+        <!-- ================= VIEW 5: CHECKOUT ================= -->
+        <div id="view-checkout" class="view-section pt-32 pb-10 px-4 max-w-3xl mx-auto min-h-screen">
+            <button onclick="switchView('cart')" class="mb-6 ios-glass px-5 py-2 rounded-2xl text-gray-300 hover:text-neon text-sm md:text-base font-bold flex items-center gap-2 w-fit border border-white/10 transition-all shadow-glass">
+                <i class="fas fa-arrow-right"></i> رجوع للكارت
+            </button>
+
+            <div class="ios-glass p-6 md:p-10 rounded-[2.5rem] border border-neon/30 shadow-neon-glass">
+                <h2 class="text-3xl font-bold mb-8 text-white text-center tracking-wide">بيانات التوصيل</h2>
                 
-                <div class="mt-6 border-t border-white/5 pt-6">
-                    <p class="text-[10px] md:text-xs text-gray-500">© ٢٠٢٦ كل الحقوق محفوظة.</p>
-                    <p class="text-xs md:text-sm text-gray-400 mt-2">
-                        تم التطوير بواسطة <span class="text-neon font-bold ml-1 drop-shadow-[0_0_5px_rgba(57,255,20,0.5)]">ELNENX</span>
-                    </p>
-                </div>
+                <form id="checkout-form" onsubmit="processOrder(event)" class="space-y-6 text-right">
+                    <div>
+                        <label class="block text-sm text-gray-300 mb-2 font-bold">الاسم بالكامل</label>
+                        <input type="text" required class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-neon focus:bg-black/60 transition-all" placeholder="اكتب اسمك ثلاثي">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-gray-300 mb-2 font-bold">رقم الموبايل</label>
+                        <input type="tel" required class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-neon focus:bg-black/60 transition-all" placeholder="01xxxxxxxxx">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-gray-300 mb-2 font-bold">المحافظة</label>
+                        <select required class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-neon focus:bg-black/60 transition-all appearance-none">
+                            <option value="" disabled selected>اختار محافظتك</option>
+                            <option value="cairo">القاهرة</option>
+                            <option value="giza">الجيزة</option>
+                            <option value="alex">الإسكندرية</option>
+                            <option value="minya">المنيا</option>
+                            <option value="other">محافظة تانية</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-gray-300 mb-2 font-bold">العنوان بالتفصيل</label>
+                        <textarea required rows="3" class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-neon focus:bg-black/60 transition-all" placeholder="الشارع، رقم العمارة، الدور، الشقة"></textarea>
+                    </div>
+
+                    <div class="bg-neon/10 border border-neon/30 p-5 rounded-2xl flex items-start gap-4 mt-6 shadow-neon-glass">
+                        <i class="fas fa-hand-holding-usd text-neon text-2xl mt-1"></i>
+                        <div>
+                            <h4 class="font-bold text-white text-base">طريقة الدفع</h4>
+                            <p class="text-sm text-gray-300 mt-1 leading-relaxed">الدفع هيكون كاش عند الاستلام. عاين براحتك الأول ولما يعجبك ادفع.</p>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full ios-glass border border-neon/50 text-neon hover:bg-neon hover:text-black font-bold py-4 rounded-2xl transition-all shadow-neon-glass hover:shadow-neon-glass-hover active:scale-95 mt-8 text-lg flex justify-center items-center gap-3 uppercase tracking-wide">
+                        <span>تأكيد الطلب 🚀</span>
+                    </button>
+                </form>
             </div>
-        </footer>
-    </div>
+        </div>
+    </main>
 
-    <!-- Scripts -->
-    <script>
-        // --- 1. Robust Video Autoplay Logic ---
-        document.addEventListener("DOMContentLoaded", function() {
-            const heroVideo = document.getElementById('hero-video');
-            
-            // Function to safely attempt playing
-            const attemptPlay = () => {
-                if (heroVideo && heroVideo.paused) {
-                    let playPromise = heroVideo.play();
-                    if (playPromise !== undefined) {
-                        playPromise.catch(error => {
-                            // Autoplay was prevented by OS (e.g. iOS Low Power Mode).
-                            // We swallow the error to keep the console clean.
-                            console.log("Autoplay is restricted by the device settings.");
-                        });
-                    }
-                }
-            };
+    <!-- Global Footer -->
+    <footer id="global-footer" class="hidden ios-glass border-t border-white/10 mt-auto rounded-t-[3rem] rounded-b-none z-10 w-full">
+        <div class="px-6 py-10 text-center text-gray-400 max-w-7xl mx-auto">
+            <div class="text-xl md:text-2xl font-bold tracking-widest text-white mb-6 uppercase flex justify-center items-center gap-1.5">
+                VOGUE <span class="text-neon">NEON</span>
+            </div>
+            <p class="mb-6 max-w-md mx-auto text-sm leading-relaxed">بنصنع الموضة مش بنمشي وراها. استايلات مستقبلية وتصميم زجاجي يناسب جرأتك ويبرز شخصيتك.</p>
+            <div class="flex justify-center gap-6 mb-6 text-2xl">
+                <a href="#" class="w-10 h-10 rounded-full ios-glass flex items-center justify-center text-gray-300 border border-white/10 hover:text-neon hover:border-neon/50 hover:shadow-neon-glass transition-all duration-300"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="w-10 h-10 rounded-full ios-glass flex items-center justify-center text-gray-300 border border-white/10 hover:text-neon hover:border-neon/50 hover:shadow-neon-glass transition-all duration-300"><i class="fab fa-tiktok"></i></a>
+            </div>
+            <div class="mt-6 border-t border-white/10 pt-4">
+                <p class="text-xs text-gray-500">© ٢٠٢٦ كل الحقوق محفوظة.</p>
+                <p class="text-sm text-gray-400 mt-2 font-medium">
+                    تم التطوير بواسطة <span class="text-neon font-bold ml-1 drop-shadow-[0_0_8px_rgba(57,255,20,0.6)]">ELNENX</span>
+                </p>
+            </div>
+        </div>
+    </footer>
 
-            attemptPlay();
-            
-            // Add a one-time touch listener as a fallback for strict mobile browsers
-            document.body.addEventListener('touchstart', attemptPlay, { once: true, passive: true });
-        });
+    <!-- Global Scripts -->
+    <script type="module">
+        // ----------------- DATA (UPDATED NAMES LTR) -----------------
+        const productsDB = [
+            { id: 'p1', title: 'VOGUE CX', price: 1600, video: 'https://files.catbox.moe/865s5j.mp4', isNew: true, desc: 'تيشرت اوفر سايز مع بنطلون كارجو، خامة قطن 100% مريحة جداً. ستايل شبابي مطرقع يعكس شخصيتك. مناسب جداً للصيف.' },
+            { id: 'p2', title: 'VOGUE STAR', price: 1600, video: 'https://files.catbox.moe/orf1qs.mp4', desc: 'إطلالة شيك جداً للمناسبات السريعة والخروجات الليلية. قصة انسيابية تناسب كل الأجسام. خامة ضد الانكماش.' },
+            { id: 'p3', title: 'VOGUE SPIDER', price: 1280, oldPrice: 1600, discount: '٢٠٪', video: 'https://files.catbox.moe/zie85h.mp4', desc: 'فستان بخامة حريرية ناعمة ولون أخضر لافت للأنظار. مثالي للسهرات والحفلات، مع خصم حصري لفترة محدودة.' }
+        ];
 
-        // --- 2. Navbar Scrolling Effect ---
-        const navbar = document.getElementById('navbar');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 30) {
-                navbar.style.background = 'rgba(10, 10, 10, 0.85)';
-                navbar.style.borderColor = 'rgba(57, 255, 20, 0.4)';
-                navbar.classList.add('shadow-neon-glass');
-                // Removed the scaling effect as it can look glitchy on some mobile browsers
-            } else {
-                navbar.style.background = 'rgba(20, 20, 20, 0.45)';
-                navbar.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-                navbar.classList.remove('shadow-neon-glass');
-            }
-        });
+        let cartData = [];
 
-        // --- 3. Open Shop Logic with fixed scrolling offset ---
-        function openShop(e) {
-            e.preventDefault();
-            const shopContainer = document.getElementById('shop-container');
-            const shopSection = document.getElementById('shop');
-            
-            shopContainer.classList.remove('hidden');
-            
-            // Ensure product videos try to play
-            document.querySelectorAll('.product-video').forEach(video => {
-                let p = video.play();
-                if(p !== undefined) p.catch(() => {});
-            });
-            
-            setTimeout(() => {
-                shopContainer.classList.remove('opacity-0');
-                
-                // Calculate position considering the fixed navbar
-                const navbarHeight = navbar.offsetHeight;
-                const offsetPosition = shopSection.getBoundingClientRect().top + window.scrollY - navbarHeight - 20;
+        // ----------------- TOAST SYSTEM -----------------
+        const showToast = (msg) => {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        };
 
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: 'smooth'
-                });
-            }, 50);
-        }
-
-        // --- 4. Add to Cart Logic ---
-        let cartCount = 0;
-        const cartBadge = document.getElementById('cart-count');
-        
-        function addToCart(btn, e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            cartCount++;
-            cartBadge.textContent = cartCount;
-            
-            // Badge animation
-            cartBadge.style.transform = 'scale(1.5)';
-            setTimeout(() => cartBadge.style.transform = 'scale(1)', 300);
-            
-            // Button feedback
-            const originalText = btn.innerHTML;
-            btn.innerHTML = 'اتضاف <i class="fas fa-check ml-1"></i>';
-            btn.classList.replace('text-neon', 'text-black');
-            btn.style.background = '#39FF14';
-            
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.classList.replace('text-black', 'text-neon');
-                btn.style.background = 'transparent';
-            }, 1500);
-        }
-
-        // --- 5. Intersection Observer for smooth reveal ---
-        const observer = new IntersectionObserver((entries, observer) => {
+        // ----------------- VIDEO PERFORMANCE -----------------
+        const videoObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target); // Stop observing once visible for better performance
-                }
+                if (entry.isIntersecting) { entry.target.play().catch(()=>{}); } 
+                else { entry.target.pause(); }
             });
-        }, { threshold: 0.1, rootMargin: "0px 0px -20px 0px" });
+        }, { threshold: 0.1 });
 
-        document.querySelectorAll('.fade-in-up').forEach((el) => {
-            observer.observe(el);
-        });
-    </script>
-</body>
-</html>
+        // ----------------- UI ROUTING -----------------
+        window.switchView = (viewId) => {
+            document.querySelectorAll('.view-section').forEach(el => {
+                el.classList.remove('active');
+                setTimeout(() => el.style.display = 'none', 300); 
+            });
+
+            setTimeout(() => {
+                const target = document.getElementById(`view-${viewId}`);
+                target.style.display = 'block';
+                setTimeout(() => target.classList.add('active'), 50);
+                window.scrollTo({ top: 0, behavior: 'auto' });
+                
+                const footer = document.getElementById('global-footer');
+                if(viewId === 'landing') footer.classList.add('hidden');
+                else footer.classList.remove('hidden');
+                
+                if(viewId === 'cart') renderCart();
+            }, 300);
+        };
+
+        // ----------------- PRODUCT CARDS (FIXED ALIGNMENT) -----------------
+        const renderProducts = () => {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = productsDB.map((p, index) => `
+                <div class="group fade-in-up" style="transition-delay: ${index * 100}ms">
+                    <div class="ios-glass p-2 md:p-3 rounded-[2.5rem] shadow-glass border border-white/10 hover:border-neon/40 hover:shadow-neon-glass transition-all duration-500 flex flex-col h-full cursor-pointer" onclick="openProductDetails('${p.id}')">
+                        <div class="relative w-full aspect-[3/4] overflow-hidden rounded-[2rem] bg-[#0a0a0a] mb-4">
+                            <video src="${p.video}" loop muted playsinline webkit-playsinline class="perf-video w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 pointer-events-none"></video>
+                            
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center backdrop-blur-sm px-4 gap-3 pointer-events-none"></div>
+
+                            <div class="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-6 gap-3">
+                                <button class="w-full bg-neon text-black font-bold py-3 rounded-2xl shadow-[0_0_15px_rgba(57,255,20,0.5)] transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-white active:scale-95 z-10" onclick="buyNowFromCard('${p.id}', event)">
+                                    شراء مباشر ⚡
+                                </button>
+                                <button class="w-full ios-glass border border-neon text-neon py-3 rounded-2xl font-bold transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-75 hover:bg-neon hover:text-black shadow-[0_0_15px_rgba(57,255,20,0.2)] active:scale-95 z-10" onclick="addToCartFromCard('${p.id}', event)">
+                                    حط في الكارت 🛒
+                                </button>
+                            </div>
+                            
+                            ${p.isNew ? `<div class="absolute top-4 right-4 ios-glass border border-white/20 text-white text-xs font-bold px-4 py-2 rounded-full uppercase tracking-wider backdrop-blur-md">جديد</div>` : ''}
+                            ${p.discount ? `<div class="absolute top-4 right-4 bg-red-500/20 backdrop-blur-md border border-red-500/50 text-red-400 text-xs font-bold px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.3)]">خصم ${p.discount}</div>` : ''}
+                        </div>
+                        
+                        <!-- Fixed Alignments for text and price -->
+                        <div class="flex items-center justify-between px-3 pb-2 mt-auto w-full gap-3">
+                            <h3 class="text-base md:text-xl font-bold text-gray-100 group-hover:text-white transition-colors truncate" dir="ltr">${p.title}</h3>
+                            <div class="flex flex-col items-end shrink-0">
+                                <div class="ios-glass border border-neon/30 px-3 py-1.5 rounded-xl text-neon font-bold text-sm whitespace-nowrap">
+                                    ${p.price} ج.م
+                                </div>
+                                ${p.oldPrice ? `<span class="text-[10px] text-gray-500 line-through mt-0.5 px-1">${p.oldPrice} ج.م</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.querySelectorAll('.fade-in-up').forEach((el) => observer.observe(el));
+            document.querySelectorAll('.perf-video').forEach(vid => videoObserver.observe(vid));
+        };
+
+        // ----------------- PRODUCT DETAILS -----------------
+        let currentSelectedSize = 'M';
+        window.openProductDetails = (id) => {
+            const product = productsDB.find(p => p.id === id);
+            if(!product) return;
+            currentSelectedSize = 'M';
+
+            const container = document.getElementById('product-detail-content');
+            container.innerHTML = `
+                <div class="flex flex-col gap-4">
+                    <div class="relative w-full aspect-[3/4] overflow-hidden rounded-[2.5rem] border border-white/10 shadow-neon-glass ios-glass p-3">
+                        <video src="${product.video}" autoplay loop muted playsinline webkit-playsinline class
+
 
 
 
