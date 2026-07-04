@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VOGUE NEON Store</title>
+    <title>Neon Glass Store Pro</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
@@ -89,11 +89,8 @@
         .view-section { display: none; opacity: 0; transition: opacity 0.4s ease-in-out; }
         .view-section.active { display: block; opacity: 1; }
         
-        /* Default Loader (White/Neon) */
-        .loader { border: 2px solid rgba(255,255,255,0.1); border-top: 2px solid #39FF14; border-radius: 50%; width: 18px; height: 18px; animation: spin 0.8s linear infinite; }
-        /* Black Loader for Neon Buttons */
-        .loader.loader-black { border: 2px solid rgba(0,0,0,0.2); border-top: 2px solid #000000; }
-        
+        .loader { border: 2px solid rgba(0,0,0,0.1); border-top: 2px solid #000; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; margin: 0 auto; }
+        .loader-white { border: 2px solid rgba(255,255,255,0.1); border-top: 2px solid #fff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; margin: 0 auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         select option { background: #111; color: #fff; }
 
@@ -117,11 +114,11 @@
         <span id="toast-msg">تمت الإضافة بنجاح</span>
     </div>
 
-    <!-- Floating Navbar -->
+    <!-- Floating Navbar (Fixed Logo Issue) -->
     <nav id="navbar" class="fixed z-50 transition-all duration-300 py-3 px-5 md:py-4 md:px-8 flex justify-between items-center ios-glass rounded-full top-4 left-4 right-4 md:left-10 md:right-10 shadow-neon-glass">
-        <!-- Logo Fixed: Removed box, just clean text -->
-        <div onclick="switchView('landing')" class="cursor-pointer text-xl md:text-2xl font-bold tracking-wider uppercase drop-shadow-lg flex items-center gap-1.5">
-            <span class="text-white">VOGUE</span> <span class="text-neon">NEON</span>
+        <!-- Logo without the background box, just neon text -->
+        <div onclick="switchView('landing')" class="cursor-pointer text-xl md:text-2xl font-black tracking-widest uppercase flex items-center gap-1">
+            <span class="text-white drop-shadow-lg">VOGUE</span><span class="text-neon drop-shadow-[0_0_8px_rgba(57,255,20,0.6)]">NEON</span>
         </div>
         
         <div class="hidden md:flex gap-8 font-medium">
@@ -131,7 +128,7 @@
 
         <div class="flex items-center gap-4 text-xl text-gray-300">
             <button class="hover:text-neon transition-colors duration-300"><i class="fas fa-search"></i></button>
-            <button onclick="switchView('cart')" class="hover:text-neon transition-colors duration-300 relative bg-white/5 p-2 rounded-full border border-white/10 shadow-glass">
+            <button onclick="switchView('cart')" class="hover:text-neon transition-colors duration-300 relative bg-white/5 p-2 rounded-full border border-white/10 shadow-glass flex items-center justify-center">
                 <i class="fas fa-shopping-bag text-lg"></i>
                 <span id="cart-badge" class="absolute -top-1 -right-1 bg-neon text-black text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-[0_0_10px_#39FF14] transition-transform duration-300">0</span>
             </button>
@@ -177,7 +174,7 @@
                 <h2 class="text-4xl md:text-5xl font-bold mb-4 relative inline-block text-white tracking-wide">
                     التشكيلة <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon to-green-400">الحصرية</span>
                 </h2>
-                <p class="text-gray-400 mt-2 text-base md:text-lg font-light">استايلات زجاجية تعكس شخصيتك بجد</p>
+                <p class="text-gray-400 mt-2 md:mt-4 text-base md:text-lg font-light">استايلات زجاجية تعكس شخصيتك بجد</p>
             </div>
 
             <!-- Products Grid -->
@@ -185,7 +182,7 @@
         </div>
 
         <!-- ================= VIEW 3: PRODUCT DETAILS ================= -->
-        <div id="view-product" class="view-section pt-32 pb-10 px-4 max-w-6xl mx-auto min-h-screen">
+        <div id="view-product" class="view-section pt-32 pb-10 px-4 md:px-6 max-w-6xl mx-auto min-h-screen">
             <button onclick="switchView('shop')" class="mb-6 ios-glass px-5 py-2 rounded-2xl text-gray-300 hover:text-neon text-sm md:text-base font-bold flex items-center gap-2 w-fit border border-white/10 hover:border-neon/50 transition-all shadow-glass">
                 <i class="fas fa-arrow-right"></i> رجوع للمنتجات
             </button>
@@ -193,20 +190,20 @@
         </div>
 
         <!-- ================= VIEW 4: CART ================= -->
-        <div id="view-cart" class="view-section pt-32 pb-10 px-4 max-w-4xl mx-auto min-h-screen">
+        <div id="view-cart" class="view-section pt-32 pb-10 px-4 md:px-6 max-w-4xl mx-auto min-h-screen">
             <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
-                <h2 class="text-3xl md:text-4xl font-bold text-white tracking-wide">
-                    الكارت <i class="fas fa-shopping-cart text-neon ml-2 text-2xl"></i>
+                <h2 class="text-2xl md:text-4xl font-bold text-white tracking-wide">
+                    الكارت <i class="fas fa-shopping-cart text-neon ml-2 text-xl md:text-2xl"></i>
                 </h2>
                 <button onclick="switchView('shop')" class="ios-glass px-4 py-2 rounded-xl text-gray-300 hover:text-neon text-sm border border-white/10 transition-all">كمل تسوق <i class="fas fa-arrow-left ml-1"></i></button>
             </div>
             
-            <div id="cart-items-container" class="space-y-4 md:space-y-5 mb-10"></div>
+            <div id="cart-items-container" class="space-y-4 mb-10"></div>
 
             <div id="cart-summary" class="ios-glass p-6 md:p-8 rounded-[2rem] border border-white/10 shadow-glass hidden">
                 <div class="flex justify-between items-center mb-6 text-xl">
                     <span class="text-gray-300 font-bold">الإجمالي:</span>
-                    <span id="cart-total" class="font-bold text-neon text-3xl drop-shadow-[0_0_8px_rgba(57,255,20,0.5)]">0 ج.م</span>
+                    <span id="cart-total" class="font-bold text-neon text-2xl md:text-3xl drop-shadow-[0_0_8px_rgba(57,255,20,0.5)]">0 ج.م</span>
                 </div>
                 <button onclick="switchView('checkout')" class="w-full bg-neon text-black font-bold py-4 rounded-2xl hover:bg-white transition-all shadow-neon-glass hover:shadow-neon-glass-hover active:scale-95 text-lg flex justify-center items-center gap-3 uppercase">
                     إتمام الطلب والدفع <i class="fas fa-arrow-left"></i>
@@ -215,15 +212,15 @@
         </div>
 
         <!-- ================= VIEW 5: CHECKOUT ================= -->
-        <div id="view-checkout" class="view-section pt-32 pb-10 px-4 max-w-3xl mx-auto min-h-screen">
+        <div id="view-checkout" class="view-section pt-32 pb-10 px-4 md:px-6 max-w-3xl mx-auto min-h-screen">
             <button onclick="switchView('cart')" class="mb-6 ios-glass px-5 py-2 rounded-2xl text-gray-300 hover:text-neon text-sm md:text-base font-bold flex items-center gap-2 w-fit border border-white/10 transition-all shadow-glass">
                 <i class="fas fa-arrow-right"></i> رجوع للكارت
             </button>
 
             <div class="ios-glass p-6 md:p-10 rounded-[2.5rem] border border-neon/30 shadow-neon-glass">
-                <h2 class="text-3xl font-bold mb-8 text-white text-center tracking-wide">بيانات التوصيل</h2>
+                <h2 class="text-2xl md:text-3xl font-bold mb-8 text-white text-center tracking-wide">بيانات التوصيل</h2>
                 
-                <form id="checkout-form" onsubmit="processOrder(event)" class="space-y-6 text-right">
+                <form id="checkout-form" onsubmit="processOrder(event)" class="space-y-5 md:space-y-6 text-right">
                     <div>
                         <label class="block text-sm text-gray-300 mb-2 font-bold">الاسم بالكامل</label>
                         <input type="text" required class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-neon focus:bg-black/60 transition-all" placeholder="اكتب اسمك ثلاثي">
@@ -270,8 +267,8 @@
     <!-- Global Footer -->
     <footer id="global-footer" class="hidden ios-glass border-t border-white/10 mt-auto rounded-t-[3rem] rounded-b-none z-10 w-full">
         <div class="px-6 py-10 text-center text-gray-400 max-w-7xl mx-auto">
-            <div class="text-xl md:text-2xl font-bold tracking-widest text-white mb-6 uppercase flex justify-center items-center gap-1.5">
-                VOGUE <span class="text-neon">NEON</span>
+            <div class="text-xl md:text-2xl font-bold tracking-widest text-white mb-6 uppercase">
+                VOGUE <span class="text-neon bg-neon/10 px-2 py-1 rounded-xl border border-neon/20 text-sm align-middle">NEON</span>
             </div>
             <p class="mb-6 max-w-md mx-auto text-sm leading-relaxed">بنصنع الموضة مش بنمشي وراها. استايلات مستقبلية وتصميم زجاجي يناسب جرأتك ويبرز شخصيتك.</p>
             <div class="flex justify-center gap-6 mb-6 text-2xl">
@@ -289,7 +286,7 @@
 
     <!-- Global Scripts -->
     <script type="module">
-        // ----------------- DATA (UPDATED NAMES LTR) -----------------
+        // ----------------- DATA (UPDATED NAMES) -----------------
         const productsDB = [
             { id: 'p1', title: 'VOGUE CX', price: 1600, video: 'https://files.catbox.moe/865s5j.mp4', isNew: true, desc: 'تيشرت اوفر سايز مع بنطلون كارجو، خامة قطن 100% مريحة جداً. ستايل شبابي مطرقع يعكس شخصيتك. مناسب جداً للصيف.' },
             { id: 'p2', title: 'VOGUE STAR', price: 1600, video: 'https://files.catbox.moe/orf1qs.mp4', desc: 'إطلالة شيك جداً للمناسبات السريعة والخروجات الليلية. قصة انسيابية تناسب كل الأجسام. خامة ضد الانكماش.' },
@@ -309,8 +306,11 @@
         // ----------------- VIDEO PERFORMANCE -----------------
         const videoObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting) { entry.target.play().catch(()=>{}); } 
-                else { entry.target.pause(); }
+                if (entry.isIntersecting) {
+                    entry.target.play().catch(()=>{});
+                } else {
+                    entry.target.pause();
+                }
             });
         }, { threshold: 0.1 });
 
@@ -328,8 +328,11 @@
                 window.scrollTo({ top: 0, behavior: 'auto' });
                 
                 const footer = document.getElementById('global-footer');
-                if(viewId === 'landing') footer.classList.add('hidden');
-                else footer.classList.remove('hidden');
+                if(viewId === 'landing') {
+                    footer.classList.add('hidden');
+                } else {
+                    footer.classList.remove('hidden');
+                }
                 
                 if(viewId === 'cart') renderCart();
             }, 300);
@@ -340,33 +343,33 @@
             const grid = document.getElementById('products-grid');
             grid.innerHTML = productsDB.map((p, index) => `
                 <div class="group fade-in-up" style="transition-delay: ${index * 100}ms">
-                    <div class="ios-glass p-2 md:p-3 rounded-[2.5rem] shadow-glass border border-white/10 hover:border-neon/40 hover:shadow-neon-glass transition-all duration-500 flex flex-col h-full cursor-pointer" onclick="openProductDetails('${p.id}')">
-                        <div class="relative w-full aspect-[3/4] overflow-hidden rounded-[2rem] bg-[#0a0a0a] mb-4">
+                    <div class="ios-glass p-3 rounded-[2.5rem] shadow-glass border border-white/10 hover:border-neon/40 hover:shadow-neon-glass transition-all duration-500 flex flex-col h-full cursor-pointer" onclick="openProductDetails('${p.id}')">
+                        <div class="relative w-full aspect-[3/4] overflow-hidden rounded-[2rem] bg-[#0a0a0a] mb-5">
                             <video src="${p.video}" loop muted playsinline webkit-playsinline class="perf-video w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 pointer-events-none"></video>
                             
-                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center backdrop-blur-sm px-4 gap-3 pointer-events-none"></div>
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center backdrop-blur-[2px] px-4 gap-3 pointer-events-none"></div>
 
                             <div class="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-6 gap-3">
-                                <button class="w-full bg-neon text-black font-bold py-3 rounded-2xl shadow-[0_0_15px_rgba(57,255,20,0.5)] transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-white active:scale-95 z-10" onclick="buyNowFromCard('${p.id}', event)">
-                                    شراء مباشر ⚡
+                                <button class="w-full bg-neon text-black font-bold py-3.5 rounded-2xl shadow-[0_0_15px_rgba(57,255,20,0.5)] transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-white active:scale-95 z-10 flex justify-center items-center" onclick="buyNowFromCard('${p.id}', event, this)">
+                                    <span>شراء مباشر ⚡</span>
                                 </button>
-                                <button class="w-full ios-glass border border-neon text-neon py-3 rounded-2xl font-bold transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-75 hover:bg-neon hover:text-black shadow-[0_0_15px_rgba(57,255,20,0.2)] active:scale-95 z-10" onclick="addToCartFromCard('${p.id}', event)">
-                                    حط في الكارت 🛒
+                                <button class="w-full ios-glass border border-neon text-neon py-3.5 rounded-2xl font-bold transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-75 hover:bg-neon hover:text-black shadow-[0_0_15px_rgba(57,255,20,0.2)] active:scale-95 z-10 flex justify-center items-center" onclick="addToCartFromCard('${p.id}', event, this)">
+                                    <span>حط في الكارت 🛒</span>
                                 </button>
                             </div>
                             
                             ${p.isNew ? `<div class="absolute top-4 right-4 ios-glass border border-white/20 text-white text-xs font-bold px-4 py-2 rounded-full uppercase tracking-wider backdrop-blur-md">جديد</div>` : ''}
-                            ${p.discount ? `<div class="absolute top-4 right-4 bg-red-500/20 backdrop-blur-md border border-red-500/50 text-red-400 text-xs font-bold px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.3)]">خصم ${p.discount}</div>` : ''}
+                            ${p.discount ? `<div class="absolute top-4 right-4 bg-red-500/20 backdrop-blur-md border border-red-500/50 text-red-400 text-xs font-bold px-4 py-2 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.3)]">خصم ${p.discount}</div>` : ''}
                         </div>
                         
-                        <!-- Fixed Alignments for text and price -->
-                        <div class="flex items-center justify-between px-3 pb-2 mt-auto w-full gap-3">
-                            <h3 class="text-base md:text-xl font-bold text-gray-100 group-hover:text-white transition-colors truncate" dir="ltr">${p.title}</h3>
+                        <!-- Fixed Layout for Arabic/English mix -->
+                        <div class="flex flex-row justify-between items-center px-2 pb-2 mt-auto w-full gap-2">
+                            <h3 class="text-lg md:text-xl font-bold text-gray-100 group-hover:text-white transition-colors truncate w-full text-right" dir="ltr">${p.title}</h3>
                             <div class="flex flex-col items-end shrink-0">
-                                <div class="ios-glass border border-neon/30 px-3 py-1.5 rounded-xl text-neon font-bold text-sm whitespace-nowrap">
+                                <div class="ios-glass border border-neon/30 px-3 py-1 md:px-4 md:py-1.5 rounded-2xl text-neon font-bold text-sm md:text-base whitespace-nowrap shadow-[0_0_10px_rgba(57,255,20,0.1)]">
                                     ${p.price} ج.م
                                 </div>
-                                ${p.oldPrice ? `<span class="text-[10px] text-gray-500 line-through mt-0.5 px-1">${p.oldPrice} ج.م</span>` : ''}
+                                ${p.oldPrice ? `<span class="text-[10px] md:text-xs text-gray-500 line-through px-2 mt-0.5">${p.oldPrice} ج.م</span>` : ''}
                             </div>
                         </div>
                     </div>
@@ -388,8 +391,274 @@
             container.innerHTML = `
                 <div class="flex flex-col gap-4">
                     <div class="relative w-full aspect-[3/4] overflow-hidden rounded-[2.5rem] border border-white/10 shadow-neon-glass ios-glass p-3">
-                        <video src="${product.video}" autoplay loop muted playsinline webkit-playsinline class
+                        <video src="${product.video}" autoplay loop muted playsinline webkit-playsinline class="perf-video w-full h-full object-cover rounded-[2rem]"></video>
+                    </div>
+                    <div class="flex gap-3 overflow-x-auto pb-2 custom-scrollbar">
+                        <div class="w-20 h-24 rounded-2xl overflow-hidden border-2 border-neon cursor-pointer shrink-0 ios-glass">
+                            <video src="${product.video}" class="w-full h-full object-cover"></video>
+                        </div>
+                        <div class="w-20 h-24 rounded-2xl border border-white/10 cursor-pointer shrink-0 bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
+                            <span class="text-white/30 text-xs">صورة 2</span>
+                        </div>
+                        <div class="w-20 h-24 rounded-2xl border border-white/10 cursor-pointer shrink-0 bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
+                            <span class="text-white/30 text-xs">صورة 3</span>
+                        </div>
+                    </div>
+                </div>
 
+                <div class="ios-glass p-6 md:p-10 rounded-[2.5rem] border border-white/10 flex flex-col justify-center shadow-glass h-fit relative">
+                    ${product.discount ? `<div class="bg-red-500/20 text-red-400 border border-red-500/50 text-xs font-bold px-4 py-2 rounded-full w-fit mb-4 shadow-[0_0_10px_rgba(239,68,68,0.3)]">وفر ${product.oldPrice - product.price} جنيه</div>` : ''}
+                    
+                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-6 tracking-wide" dir="ltr" style="text-align: right;">${product.title}</h2>
+                    
+                    <div class="flex items-center justify-between mb-6 bg-white/5 p-4 rounded-2xl border border-white/10">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl md:text-3xl font-bold text-neon drop-shadow-[0_0_5px_rgba(57,255,20,0.5)]">${product.price} ج.م</span>
+                            ${product.oldPrice ? `<span class="text-sm md:text-base text-gray-500 line-through mt-1">${product.oldPrice} ج.م</span>` : ''}
+                        </div>
+                        <button id="detail-add-btn" onclick="addDirectToCart('${product.id}', this)" class="ios-glass border border-neon/50 text-neon hover:bg-neon hover:text-black font-bold px-5 py-2.5 rounded-xl transition-all shadow-neon-glass active:scale-95 flex items-center justify-center gap-2">
+                            <span>إضافة</span>
+                            <i class="fas fa-cart-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <h3 class="text-white font-bold text-lg mb-2">تفاصيل المنتج:</h3>
+                        <ul class="text-gray-300 text-sm md:text-base leading-relaxed space-y-2 list-disc list-inside pr-2">
+                            <li>${product.desc}</li>
+                            <li>غسيل في الغسالة بماء بارد.</li>
+                            <li>ضمان استبدال واسترجاع خلال 14 يوم.</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-white font-bold text-lg">اختار المقاس:</span>
+                        </div>
+                        <div class="flex gap-3 md:gap-4">
+                            ${['S', 'M', 'L', 'XL'].map(size => `
+                                <button onclick="selectSize(this, '${size}')" class="size-btn flex-1 py-3 md:py-4 rounded-2xl border ${size === 'M' ? 'border-neon bg-neon/10 text-neon shadow-[0_0_10px_rgba(57,255,20,0.2)]' : 'border-white/20 text-gray-300 hover:border-neon/50'} transition-all font-bold text-base md:text-lg">
+                                    ${size}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
 
+                    <div class="mt-auto pt-4 border-t border-white/10">
+                        <button id="detail-buy-btn" onclick="buyNowFromDetails('${product.id}', this)" class="w-full bg-neon text-black font-bold py-4 md:py-5 rounded-2xl transition-all shadow-[0_0_15px_rgba(57,255,20,0.4)] hover:bg-white active:scale-95 text-lg md:text-xl flex justify-center items-center gap-3">
+                            <span>شراء مباشر دلوقتي ⚡</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            switchView('product');
+            document.querySelectorAll('#view-product .perf-video').forEach(vid => videoObserver.observe(vid));
+        };
 
+        window.selectSize = (btn, size) => {
+            currentSelectedSize = size;
+            document.querySelectorAll('.size-btn').forEach(b => {
+                b.classList.remove('border-neon', 'bg-neon/10', 'text-neon', 'shadow-[0_0_10px_rgba(57,255,20,0.2)]');
+                b.classList.add('border-white/20', 'text-gray-300');
+            });
+            btn.classList.add('border-neon', 'bg-neon/10', 'text-neon', 'shadow-[0_0_10px_rgba(57,255,20,0.2)]');
+            btn.classList.remove('border-white/20', 'text-gray-300');
+        };
 
+        // ----------------- FIREBASE & CART LOGIC -----------------
+        const initFirebase = async () => {
+            if(!window.auth) return;
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(window.auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(window.auth);
+                }
+            } catch(e) { console.error("Auth Error", e); }
+
+            onAuthStateChanged(window.auth, (user) => {
+                window.currentUser = user;
+                if(user) {
+                    const cartRef = window.fsCollection(window.db, 'artifacts', window.appId, 'users', user.uid, 'cart');
+                    window.fsOnSnapshot(cartRef, (snapshot) => {
+                        cartData = snapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
+                        updateCartBadge();
+                        if(document.getElementById('view-cart').classList.contains('active')) renderCart();
+                    }, (err) => {});
+                }
+            });
+        };
+
+        const updateCartBadge = () => {
+            const badge = document.getElementById('cart-badge');
+            badge.innerText = cartData.length;
+            if(cartData.length > 0){
+                badge.style.transform = 'scale(1.5)';
+                setTimeout(() => badge.style.transform = 'scale(1)', 300);
+            }
+        };
+
+        const pushToFirebase = async (product, size) => {
+            if(window.currentUser && window.db) {
+                try {
+                    const cartRef = window.fsCollection(window.db, 'artifacts', window.appId, 'users', window.currentUser.uid, 'cart');
+                    await window.fsAddDoc(cartRef, { productId: product.id, title: product.title, price: product.price, imageVid: product.video, size: size, addedAt: new Date().toISOString() });
+                } catch(e) { console.log(e); }
+            } else {
+                cartData.push({ docId: Date.now().toString(), productId: product.id, title: product.title, price: product.price, imageVid: product.video, size: size });
+                updateCartBadge();
+            }
+        };
+
+        // UI ACTIONS (With fixed loader layout)
+        window.addDirectToCart = async (productId, btnElement) => {
+            const originalContent = btnElement.innerHTML;
+            btnElement.innerHTML = '<div class="loader-white"></div>';
+            const product = productsDB.find(p => p.id === productId);
+            await pushToFirebase(product, currentSelectedSize);
+            
+            btnElement.innerHTML = originalContent;
+            showToast("تم إضافة المنتج للكارت بنجاح ✔️");
+        };
+
+        window.buyNowFromDetails = async (productId, btnElement) => {
+            const originalContent = btnElement.innerHTML;
+            btnElement.innerHTML = '<div class="loader"></div>';
+            const product = productsDB.find(p => p.id === productId);
+            await pushToFirebase(product, currentSelectedSize);
+            btnElement.innerHTML = originalContent;
+            switchView('checkout');
+        };
+
+        window.addToCartFromCard = async (productId, e, btnElement) => {
+            e.preventDefault(); e.stopPropagation();
+            const originalContent = btnElement.innerHTML;
+            btnElement.innerHTML = '<div class="loader-white"></div>';
+            const product = productsDB.find(p => p.id === productId);
+            await pushToFirebase(product, 'M');
+            
+            btnElement.innerHTML = '<span>اتضاف ✔️</span>';
+            btnElement.classList.replace('text-neon', 'text-black');
+            btnElement.style.background = '#39FF14';
+            setTimeout(() => {
+                btnElement.innerHTML = originalContent;
+                btnElement.classList.replace('text-black', 'text-neon');
+                btnElement.style.background = 'transparent';
+            }, 1500);
+            showToast("تم الإضافة للسلة ✔️");
+        };
+
+        window.buyNowFromCard = async (productId, e, btnElement) => {
+            e.preventDefault(); e.stopPropagation();
+            const originalContent = btnElement.innerHTML;
+            btnElement.innerHTML = '<div class="loader"></div>';
+            const product = productsDB.find(p => p.id === productId);
+            await pushToFirebase(product, 'M');
+            btnElement.innerHTML = originalContent;
+            switchView('checkout');
+        };
+
+        window.removeFromCart = async (docId) => {
+            if(window.currentUser && window.db) {
+                try {
+                    const docRef = window.fsDoc(window.db, 'artifacts', window.appId, 'users', window.currentUser.uid, 'cart', docId);
+                    await window.fsDeleteDoc(docRef);
+                } catch(e) {}
+            } else {
+                cartData = cartData.filter(i => i.docId !== docId);
+                updateCartBadge();
+                renderCart();
+            }
+        };
+
+        const renderCart = () => {
+            const container = document.getElementById('cart-items-container');
+            const summary = document.getElementById('cart-summary');
+            
+            if(cartData.length === 0) {
+                container.innerHTML = `
+                    <div class="ios-glass p-10 rounded-[2rem] text-center border border-white/10 flex flex-col items-center">
+                        <i class="fas fa-box-open text-6xl mb-4 text-white/20"></i>
+                        <p class="text-xl text-gray-400">الكارت بتاعك فاضي لسه!</p>
+                    </div>`;
+                summary.classList.add('hidden');
+                return;
+            }
+
+            summary.classList.remove('hidden');
+            let total = 0;
+
+            container.innerHTML = cartData.map(item => {
+                total += item.price;
+                return `
+                <div class="ios-glass p-4 rounded-[2rem] flex items-center gap-4 md:gap-5 relative border border-white/10 hover:border-neon/30 transition-all group">
+                    <div class="w-20 h-28 md:w-24 md:h-32 rounded-3xl overflow-hidden bg-zinc-900 shrink-0 border border-white/10">
+                        <video src="${item.imageVid}" autoplay loop muted playsinline class="w-full h-full object-cover pointer-events-none"></video>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-white font-bold text-base md:text-lg mb-1 truncate" dir="ltr" style="text-align: right;">${item.title}</h3>
+                        <p class="text-gray-400 text-xs md:text-sm mb-2">المقاس: <span class="bg-neon/10 text-neon px-2 py-0.5 rounded-lg border border-neon/30 font-bold mx-1">${item.size}</span></p>
+                        <p class="text-neon font-bold text-lg md:text-xl drop-shadow-[0_0_5px_rgba(57,255,20,0.3)]">${item.price} ج.م</p>
+                    </div>
+                    <button onclick="removeFromCart('${item.docId}')" class="w-8 h-8 md:w-10 md:h-10 rounded-full ios-glass border-red-500/50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all absolute top-4 left-4 shadow-[0_0_10px_rgba(239,68,68,0.2)]">
+                        <i class="fas fa-trash-alt text-xs md:text-base"></i>
+                    </button>
+                </div>
+                `;
+            }).join('');
+
+            document.getElementById('cart-total').innerText = `${total} ج.م`;
+        };
+
+        // ----------------- CHECKOUT LOGIC -----------------
+        window.processOrder = async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerHTML = '<div class="loader"></div> <span class="ml-2 text-black">جاري تأكيد الطلب...</span>';
+            
+            setTimeout(async () => {
+                if(window.currentUser && window.db) {
+                    for(let item of cartData) {
+                        try {
+                            const docRef = window.fsDoc(window.db, 'artifacts', window.appId, 'users', window.currentUser.uid, 'cart', item.docId);
+                            await window.fsDeleteDoc(docRef);
+                        } catch(err) {}
+                    }
+                }
+                cartData = []; updateCartBadge();
+                
+                document.getElementById('view-checkout').innerHTML = `
+                    <div class="ios-glass p-8 md:p-12 rounded-[3rem] text-center border border-neon/50 shadow-neon-glass flex flex-col items-center">
+                        <div class="w-20 h-20 md:w-24 md:h-24 bg-neon/10 rounded-full flex items-center justify-center text-neon text-4xl md:text-5xl mb-6 border-2 border-neon shadow-[0_0_30px_rgba(57,255,20,0.4)]">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <h2 class="text-2xl md:text-3xl font-bold text-white mb-3">تم تأكيد طلبك بنجاح! 🎉</h2>
+                        <p class="text-gray-400 mb-8 text-base md:text-lg">هنتواصل معاك في أقرب وقت عشان نأكد تفاصيل الشحن.</p>
+                        <button onclick="location.reload();" class="ios-glass border border-neon text-neon font-bold px-8 py-3 md:px-10 md:py-4 rounded-2xl hover:bg-neon hover:text-black transition-all text-base md:text-lg shadow-neon-glass">
+                            الرجوع للمتجر
+                        </button>
+                    </div>
+                `;
+            }, 1500);
+        };
+
+        // ----------------- OBSERVER & INIT -----------------
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 30) {
+                navbar.style.background = 'rgba(10, 10, 10, 0.85)';
+                navbar.style.borderColor = 'rgba(57, 255, 20, 0.4)';
+                navbar.classList.add('shadow-neon-glass');
+            } else {
+                navbar.style.background = 'rgba(20, 20, 20, 0.45)';
+                navbar.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                navbar.classList.remove('shadow-neon-glass');
+            }
+        });
+
+        renderProducts();
+        initFirebase();
+
+    </script>
+</body>
+    </html>
